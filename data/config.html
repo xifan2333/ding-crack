@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>钉钉打卡</title>
+  </head>
+  <style>
+    html,
+    body {
+      font-size: 16px;
+      font-family: sans-serif;
+      line-height: 1.75em;
+      background-color: #f6f6f6;
+    }
+    a {
+      text-decoration: none;
+      color: #42b983;
+      font-size: 18px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    nav {
+      text-align: center;
+    }
+    nav > ul {
+      list-style: none;
+      margin: 20px 0;
+      padding: 0;
+    }
+    nav > ul li {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    article {
+      width: 90%;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: white;
+      text-align: center;
+    }
+    button {
+      margin: 10px;
+      background-color: #f4f5f5;
+      border: none;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 2px;
+    }
+    fieldset {
+      border: none;
+    }
+    input {
+      outline-style: none;
+      border: #e0e0e6 2px solid;
+      border-radius: 4px;
+      font-size: 16px;
+      line-height: 1.75em;
+      margin: 5px 0;
+      padding: 0 10px;
+    }
+    input:hover,
+    input:focus {
+      border: #42b983 2px solid;
+    }
+  </style>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="./index.html">状态</a></li>
+          <li><a href="./config.html">配置</a></li>
+        </ul>
+      </nav>
+    </header>
+    <article>
+      <form onsubmit="return false">
+        <fieldset>
+          <legend>配置连接网络</legend>
+          <div>
+            <input type="text" id="ssid" placeholder="配网 WiFi 名称" />
+          </div>
+          <div>
+            <input type="text" id="password" placeholder="配网 WiFi 密码" />
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>配置公司网络</legend>
+          <div>
+            <input type="text" id="apssid" placeholder="公司 WiFI 名称" />
+          </div>
+          <div style="text-align: center">
+            <input type="text" id="apmac" placeholder="公司 Mac 地址" />
+          </div>
+          <div>
+            <button onclick="submitConifg()">修改配置</button>
+          </div>
+        </fieldset>
+      </form>
+    </article>
+  </body>
+  <script>
+    function submitConifg() {
+      let ssid = document.getElementById('ssid').value
+      let password = document.getElementById('password').value
+      let apssid = document.getElementById('apssid').value
+      let apmac = document.getElementById('apmac').value
+      if ([ssid, password, apssid, apmac].some((item) => item.length < 1)) {
+        alert('请填写所有信息')
+      } else if (!/[^\u4e00-\u9fa5\s]{8,}$/.test(password)) {
+        alert('WiFi 密码不能小于8位或包含中文')
+      } else if (
+        !/(([a-f0-9]{2}:)|([a-f0-9]{2}-)){5}[a-f0-9]{2}/gi.test(apmac)
+      ) {
+        alert('Mac 地址不符合规范')
+      } else {
+        let request = new XMLHttpRequest()
+        request.open('POST', '/api/config', true)
+        request.setRequestHeader('content-type', 'application/json')
+        request.send(JSON.stringify({ ssid, password, apssid, apmac }))
+        request.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            alert(`配置成功！等待设备重启，连接设置好的WiFi打卡`)
+          }
+        }
+      }
+    }
+  </script>
+</html>
